@@ -1,4 +1,4 @@
-package com.example.neo4jback.model;
+package com.example.neo4jback.model.categories;
 
 public class ItemStyle {
     private String color;

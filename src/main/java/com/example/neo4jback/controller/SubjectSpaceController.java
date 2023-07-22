@@ -1,7 +1,10 @@
 package com.example.neo4jback.controller;
 
 import com.example.neo4jback.model.*;
-import com.example.neo4jback.service.Neo4jService;
+import com.example.neo4jback.model.Space.SubjectSpaceResponse;
+import com.example.neo4jback.model.categories.Category1;
+import com.example.neo4jback.model.categories.ItemStyle;
+import com.example.neo4jback.service.Neo4jSubjectSpaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +19,7 @@ import java.util.Map;
 public class SubjectSpaceController {
 
     @Autowired
-    private Neo4jService neo4jService;
+    private Neo4jSubjectSpaceService neo4jService;
 
     @GetMapping("/reqSubjectSpace")
     public SubjectSpaceResponse getSubjectSpace() {
@@ -26,13 +29,13 @@ public class SubjectSpaceController {
 
         // 构建返回的JSON格式数据
         SubjectSpaceResponse response = new SubjectSpaceResponse();
-        List<Category> categories = new ArrayList<>();
+        List<Category1> categories = new ArrayList<>();
         List<Node> nodes = new ArrayList<>();
         List<Link> links = new ArrayList<>();
 
         // 构建Category列表
-        categories.add(new Category(0, "实体", new ItemStyle("#E99D42")));
-        categories.add(new Category(1, "行为", new ItemStyle("#4095E5")));
+        categories.add(new Category1(0, "实体", new ItemStyle("#E99D42")));
+        categories.add(new Category1(1, "行为", new ItemStyle("#4095E5")));
 
         // 构建Node列表
         for (Map<String, Object> nodeFromDb : nodesFromDb) {

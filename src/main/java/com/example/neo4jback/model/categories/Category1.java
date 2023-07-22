@@ -1,13 +1,11 @@
-package com.example.neo4jback.model;
+package com.example.neo4jback.model.categories;
 
-public class Category {
+public class Category1 {
     private int id;
     private String name;
     private ItemStyle itemStyle;
 
-    // 省略构造函数、Getter和Setter
-
-    public Category(int id, String name, ItemStyle itemStyle) {
+    public Category1(int id, String name, ItemStyle itemStyle) {
         this.id = id;
         this.name = name;
         this.itemStyle = itemStyle;

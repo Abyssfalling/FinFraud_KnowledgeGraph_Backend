@@ -7,7 +7,9 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
+import org.springframework.data.neo4j.core.schema.Node;
 
+@Node
 @NodeEntity(label = "Action")
 @Data
 @Builder
@@ -19,6 +21,10 @@ public class Action {
 
     @Property
     private String name;
+
+    private int category;
+
+    private int identity;
 
     public Long getId() {
         return id;
@@ -34,5 +40,21 @@ public class Action {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
+    public int getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(int identity) {
+        this.identity = identity;
     }
 }
