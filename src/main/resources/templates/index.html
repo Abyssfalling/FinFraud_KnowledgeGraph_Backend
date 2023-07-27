@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--suppress ALL-->
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎使用反洗钱系统</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <!-- 引入Bootstrap CSS样式 -->
+    <link rel="stylesheet" href="../front/css/bootstrap.min.css">
+</head>
+
+<body>
+
+<div class="container">
+    <h1 class="text-center mt-5">欢迎使用反洗钱系统</h1>
+    <p class="text-center">本系统致力于帮助金融机构有效防范和打击洗钱活动</p>
+
+    <div class="row mt-5">
+        <div class="col-md-4" style="margin-bottom: 2%">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">业务申请平台</h5>
+                    <p class="card-text">反洗钱业务的申请功能</p>
+                    <a href="/apply/businessApplyPerson" class="btn btn-primary">进入</a>
+                    <span style="color: red;" th:if="${user}!=null and ${user.type} == '1'">已登录该平台</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" style="margin-bottom: 2%">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">业务管理平台</h5>
+                    <p class="card-text">数据管理、模型管理、用户管理等功能</p>
+                    <a href="/platform/platformManagePerson" class="btn btn-primary">进入</a>
+                    <span style="color: red;" th:if="${user}!=null and ${user.type} == '2'">已登录该平台</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" style="margin-bottom: 2%">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">风险防控平台</h5>
+                    <p class="card-text">策略管理、交易监控、拦截交易审核等功能</p>
+                    <a href="/risk/riskPreventionPerson" class="btn btn-primary">进入</a>
+                    <span style="color: red;" th:if="${user}!=null and ${user.type} == '3'">已登录该平台</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4" style="margin-bottom: 2%">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">MPT项目</h5>
+                    <p class="card-text">金融风控管理平台</p>
+                    <a href="/fengkong" class="btn btn-primary">进入</a>
+                    <span style="color: red;" th:if="${user}!=null and ${user.type} == '4'">已登录该平台</span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<!-- 引入jQuery和Bootstrap JS库 -->
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="../front/js/bootstrap.min.js"></script>
+</body>
+
+</html>

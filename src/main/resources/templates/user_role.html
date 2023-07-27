@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<!--suppress ALL-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>统计分析界面</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <link rel="stylesheet" href="../front/css/base.css">
+    <link rel="stylesheet" href="../front/css/bootstrap.min.css">
+</head>
+<body>
+<!--顶部-->
+
+<!--内容部分-->
+<div class="con left">
+
+    <h1 style="text-align: center">用户权限管理</h1>
+
+    <!--数据总概-->
+    <div class="stiatic_top_con left">
+
+
+        <div>
+            <input id="filterName" type="text" placeholder="请输入姓名"
+                   style="width: 180px;height: 28px;border-radius: 3px;text-indent: 1em;border: 1px solid#4b8df8;" />
+            <button onclick="filterByName()" class="btn" style="margin-left:20px;font-size: 15px;color: red;background-color: yellow">
+                查询
+            </button>
+        </div>
+
+
+
+        <table style="text-align: center;margin: 5px;">
+            <thead style="color: white"><tr>
+                <th>姓名</th>
+                <th>角色</th>
+                <th>状态</th>
+                <th colspan="2">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user:${userList}">
+                    <td th:text="${user.username}"></td>
+                    <td th:if="${user.type==1}">业务申请者</td>
+                    <td th:if="${user.type==2}">平台管理员</td>
+                    <td th:if="${user.type==3}">风控人员</td>
+                    <td th:if="${user.type==4}">MPT人员</td>
+                    <td th:text="${user.status==0?'已启用':'已禁用'}"></td>
+                    <td>
+                        <button class="btn" style="font-size: 14px;font-weight: bold;color: red;" th:text="${user.status==0?'禁用用户':'启用用户'}" th:onclick="'controlRole('+${user.id}+','+${user.status}+')'"></button>
+                    </td>
+                    <td>
+                        <button class="btn" style="font-size: 14px;font-weight: bold;color: yellow;" th:data-username="${user.username}" onclick="showOprLog(this)">查看日志</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <nav class="mt-1" th:fragment="pagination">
+            <!--如果没有记录，则不显示分页的功能-->
+            <ul class="pagination justify-content-center" th:if="${page.rows!=0}">
+                <li class="">
+                    <span class="page-link"><i th:text="${rows}"></i>条记录</span>
+                </li>
+                <li th:class="|page-item ${page.current==1?'disabled':''}|">
+                    <a class="page-link" th:href="@{${page.path}(current=1)}">首页</a>
+                </li>
+                <li th:class="|page-item ${page.current==1?'disabled':''}|">
+                    <a class="page-link" th:href="@{${page.path}(current=${page.current - 1})}">上页</a>
+                </li>
+                <li th:class="|page-item ${page.current==i?'active':''}|" th:each="i:${#numbers.sequence(page.from,page.to)}">
+                    <a class="page-link" th:href="@{${page.path}(current=${i})}" th:text="${i}">1</a>
+                </li>
+
+                <li th:class="|page-item ${page.current==page.total?'disabled':''}|">
+                    <a class="page-link" th:href="@{${page.path}(current=${page.current + 1})}">下页</a>
+                </li>
+                <li th:class="|page-item ${page.current==page.total?'disabled':''}|"><a class="page-link" th:href="@{${page.path}(current=${page.total})}">末页</a></li>
+            </ul>
+        </nav>
+    </div>
+
+
+
+</div>
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="../front/js/echarts-all.js"></script>
+<script src="../front/js/base.js"></script>
+<script>
+
+
+    function filterByName() {
+        let filterName = $("#filterName").val();
+        location.href = "/platform/userRole?filterName="+filterName;
+    }
+
+    function controlRole(id, status) {
+        status = status==0?1:0;
+        location.href = "/platform/controlRole?id="+id+"&status="+status;
+    }
+
+    function showOprLog(element) {
+        let filterName = element.dataset.username;
+        location.href = "/platform/userLog?filterName="+filterName;
+    }
+
+</script>
+
+</body>
+</html>

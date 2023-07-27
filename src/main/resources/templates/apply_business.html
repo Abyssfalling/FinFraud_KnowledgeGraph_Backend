@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>申请业务页面</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <link rel="stylesheet" href="../front/css/base.css">
+    <link rel="stylesheet" href="../front/css/tail.css">
+</head>
+<body>
+
+
+<!--内容部分-->
+<div class="con left">
+    <!--数据总概-->
+    <div class="stiatic_top_con left">
+
+
+        <fieldset class="message_fieldset" style="margin-bottom: 5%">
+            <legend style="color: white">申请业务</legend>
+            <table id="app">
+                <tr>
+                    <td class="labe_td">业务名称：</td>
+                    <td><span>反洗钱业务</span></td>
+                </tr>
+                <tr>
+                    <td class="labe_td">业务状态：</td>
+                    <td><span id="showState"></span></td>
+                </tr>
+            </table>
+        </fieldset>
+
+        <fieldset class="message_fieldset" style="margin-bottom: 5%">
+            <legend style="color: white">监控指标</legend>
+            <table>
+                <tr>
+                    <td><label><input checked="checked" type="checkbox" name="metrics">准确率</label></td>
+                    <td><label><input checked="checked" type="checkbox" name="metrics">精确率</label></td>
+                    <td><label><input checked="checked" type="checkbox" name="metrics">召回率</label></td>
+                    <td><label><input checked="checked" type="checkbox" name="metrics">f1-score</label></td>
+                </tr>
+            </table>
+        </fieldset>
+
+        <div class="message_footer">
+            <button id="apply" class="bule" onclick="submitRequest()"></button>
+        </div>
+
+
+    </div>
+
+
+
+</div>
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="../front/js/echarts-all.js"></script>
+<script src="../front/js/base.js"></script>
+<script>
+
+    //申请业务的状态（0代表未申请，1代表申请）
+    let applyStatus = 0;
+
+    //显示反洗钱业务状态
+    function showState() {
+        $.ajax({
+            url:"/platform/showState",
+            success:function (data) {
+                applyStatus = parseInt(data);
+                if(data==0){
+                    $("#apply").attr("class","bule");
+                    $("#apply").text("申请业务");
+                    $("#showState").text("未申请");
+                }else{
+                    $("#apply").attr("class","orgen");
+                    $("#apply").text("取消业务");
+                    $("#showState").text("已申请");
+                }
+            }
+        });
+    }
+
+    setInterval(function () {
+        showState();
+    },10);
+
+    function submitRequest() {
+        let checkBoxes = $('input[name="metrics"]');
+        let metrics = "";
+        checkBoxes.each(function () {
+            if($(this).is(':checked')){
+                metrics += "1";
+            }else{
+                metrics += "0";
+            }
+        });
+        $.ajax({
+            url:"/platform/realTimeTransaction",
+            data:{applyStatus:(parseInt(applyStatus)+1)%2,metrics},
+            success:function () {
+                let msg = applyStatus==0?"成功申请业务":"成功取消业务";
+                alert(msg)
+            }
+        });
+    }
+
+
+
+
+</script>
+
+</body>
+</html>

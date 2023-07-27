@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>模型训练界面</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <link rel="stylesheet" href="../front/css/base.css">
+</head>
+<body>
+
+
+<div class="static_top left nav_active">
+    <a style="color: white" href="/model/modelTrain" >模型个性化训练</a>
+</div>
+<div class="static_top left">
+    <a style="color: white" href="/model/modelShow">训练结果可视化</a>
+</div>
+
+
+<!--内容部分-->
+<div class="con left">
+    <!--数据总概-->
+    <div class="stiatic_top_con left">
+
+        <fieldset class="message_fieldset">
+            <legend style="color: white">模型选择</legend>
+            <div class="table_find" style="font-size: 15px;">
+                <p style="color: white;display: flex;flex-wrap: wrap;">
+                    <label style="flex: 0 0 20%;"><input onchange="showParams('GCN')" type="radio" id="opt-1" name="model" value="GCN">GCN</label>
+                    <label style="flex: 0 0 20%;"><input onchange="showParams('GAT')" type="radio" id="opt-2" name="model" value="GAT">GAT</label>
+                    <label style="flex: 0 0 20%;"><input onchange="showParams('RAW_GNN')" type="radio" id="opt-3" name="model" value="RAW_GNN">RAW_GNN</label>
+                    <label style="flex: 0 0 20%;"><input onchange="showParams('MERE')" type="radio" id="opt-4" name="model" value="MERE">MERE</label>
+                    <label style="flex: 0 0 20%;"><input onchange="showParams('GRAPH_RNN')" type="radio" id="opt-5" name="model" value="GRAPH_RNN">GRAPH_RNN</label>
+                </p>
+            </div>
+            <table>
+                <tr>
+                    <td class="labe_td">已选择：</td>
+                    <td><span id="selectedModel"></span></td>
+                </tr>
+            </table>
+        </fieldset>
+
+        <fieldset class="message_fieldset">
+            <legend style="color: white">训练进度</legend>
+            <table id="app">
+                <tr>
+                    <td class="labe_td">状态：</td>
+                    <td><span id="showState"></span></td>
+                </tr>
+                <tr v-for="item in stepList" style="border: 1px solid red;">
+                    <td v-text="" class="labe_td"></td>
+                    <td><span v-text="item"></span></td>
+                </tr>
+            </table>
+        </fieldset>
+
+    </div>
+    <div class="div_any">
+        <div class="left div_any03">
+            <div class="div_any_child01 left">
+                <div class="div_any_title"><img src="../front/img/title_1.png">模型训练设置</div>
+
+                <fieldset class="message_fieldset" style="color: white;margin-bottom: 5%;margin-top: 5%">
+                    <legend>模型参数</legend>
+                    <table id="params" style="color: white">
+                    </table>
+                    <button id="submitBtn" onclick="submitRequest()">提交请求</button>
+                </fieldset>
+
+            </div>
+            <div class="div_any_child01 left">
+                <div class="div_any_title"><img src="../front/img/title_2.png">模型训练情况<span id="model_performance"></span></div>
+                <p id="char" class="p_chart"></p>
+            </div>
+        </div>
+
+
+    </div>
+
+
+</div>
+<script src="../front/js/vue@2.7.10.js"></script>
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="../front/js/base.js"></script>
+<script>
+
+    function showParams(model) {
+
+        readByModel();
+        $("#selectedModel").text(model);
+
+        let $params = $("#params");
+        $params.empty();
+
+        if(model=='GCN'){
+            let $hidden_size = $("<tr>\n" +
+                "            <td class=\"labe_td\">隐藏层大小(1-999)</td>\n" +
+                "            <td><input type=\"text\" value='65' name=\"hiddenSize\"></td>\n" +
+                "        </tr>");
+            $params.append($hidden_size);
+        }else if(model=="GAT"){
+            let $hidden_size = $("<tr>\n" +
+                "            <td class=\"labe_td\">隐藏层大小(1-999)</td>\n" +
+                "            <td><input type=\"text\" value='65' name=\"hiddenSize\"></td>\n" +
+                "        </tr>");
+            let $num_heads = $("<tr>\n" +
+                "            <td class=\"labe_td\">注意力头的数量(1-20)</td>\n" +
+                "            <td><input type=\"text\" value='5' name=\"numHeads\"></td>\n" +
+                "        </tr>");
+            $params.append($hidden_size);
+            $params.append($num_heads);
+        }else if(model=="RAW_GNN"){
+            let $dfs_p = $("<tr>\n" +
+                "            <td class=\"labe_td\">偏向于dfs的参数p(p>1)</td>\n" +
+                "            <td><input type=\"text\" value='2' name=\"dfsP\"></td>\n" +
+                "        </tr>");
+            let $dfs_q = $("<tr>\n" +
+                "            <td class=\"labe_td\">偏向于dfs的参数q(0-1)</td>\n" +
+                "            <td><input type=\"text\" value='0.5' name=\"dfsQ\"></td>\n" +
+                "        </tr>");
+            let $bfs_p = $("<tr>\n" +
+                "            <td class=\"labe_td\">偏向于bfs的参数p(p>1)</td>\n" +
+                "            <td><input type=\"text\" value='0.5' name=\"bfsP\"></td>\n" +
+                "        </tr>");
+            let $bfs_q = $("<tr>\n" +
+                "            <td class=\"labe_td\">偏向于bfs的参数q(0-1)</td>\n" +
+                "            <td><input type=\"text\" value='2' name=\"bfsQ\"></td>\n" +
+                "        </tr>");
+            let $path_len = $("<tr>\n" +
+                "            <td class=\"labe_td\">路径长度(3-8)</td>\n" +
+                "            <td><input type=\"text\" value='5' name=\"pathLen\"></td>\n" +
+                "        </tr>");
+            let $num_paths = $("<tr>\n" +
+                "            <td class=\"labe_td\">路径条数(10-40)</td>\n" +
+                "            <td><input type=\"text\" value='10' name=\"numPaths\"></td>\n" +
+                "        </tr>");
+            $params.append($dfs_p);
+            $params.append($dfs_q);
+            $params.append($bfs_p);
+            $params.append($bfs_q);
+            $params.append($path_len);
+            $params.append($num_paths);
+        }else if(model=="MERE"){
+            let $degree = $("<tr>\n" +
+                "            <td class=\"labe_td\">节点度数(3-10)</td>\n" +
+                "            <td><input type=\"text\" value='5' name=\"nodeDegree\"></td>\n" +
+                "        </tr>");
+            let $path_len = $("<tr>\n" +
+                "            <td class=\"labe_td\">路径长度(3-8)</td>\n" +
+                "            <td><input type=\"text\" value='5' name=\"pathLen\"></td>\n" +
+                "        </tr>");
+            let $num_paths = $("<tr>\n" +
+                "            <td class=\"labe_td\">路径条数(10-40)</td>\n" +
+                "            <td><input type=\"text\" value='10' name=\"numPaths\"></td>\n" +
+                "        </tr>");
+            $params.append($degree);
+            $params.append($path_len);
+            $params.append($num_paths);
+        }else if(model=="GRAPH_RNN"){
+            let $degree = $("<tr>\n" +
+                "            <td class=\"labe_td\">节点度数(3-8)</td>\n" +
+                "            <td><input type=\"text\" value='4' name=\"nodeDegree\"></td>\n" +
+                "        </tr>");
+            let $depth_bfs = $("<tr>\n" +
+                "            <td class=\"labe_td\">bfs的最大遍历层级(3-10)</td>\n" +
+                "            <td><input type=\"text\" value='5' name=\"depthDfs\"></td>\n" +
+                "        </tr>");
+            let $sample_rate = $("<tr>\n" +
+                "            <td class=\"labe_td\">邻居节点采样率(0.3-1)</td>\n" +
+                "            <td><input type=\"text\" value='0.8' name=\"sampleRate\"></td>\n" +
+                "        </tr>");
+            $params.append($degree);
+            $params.append($depth_bfs);
+            $params.append($sample_rate);
+        }
+
+        let $dropout = $("<tr>\n" +
+            "            <td class=\"labe_td\">dropout防止过拟合</td>\n" +
+            "            <td><input type=\"text\" value='0.35' name=\"dropout\"></td>\n" +
+            "        </tr>");
+        let $epochs = $("<tr>\n" +
+            "            <td class=\"labe_td\">epochs迭代次数</td>\n" +
+            "            <td><input type=\"text\" value='150' name=\"epochs\"></td>\n" +
+            "        </tr>");
+        $params.append($dropout);
+        $params.append($epochs);
+    }
+
+
+    function submitRequest() {
+
+        let json = {};
+        json['model'] = $("#selectedModel").text();
+
+        if(json['model']==null||json['model']==""){
+            alert("请选择模型！");
+            return;
+        }
+
+        $('#params input').each(function() {
+            var value = $(this).val();
+            var name = $(this).attr("name");
+            json[name] = value;
+        });
+
+        $.ajax({
+            url:"/model/train",
+            data:json,
+        });
+    }
+
+
+    let mv = new Vue({
+        el:"#app",
+        data:{
+            stepList:[]
+        }
+    });
+
+
+    //实时展示数据生成状态
+    setInterval(function () {
+        getState();
+    },10);
+    function getState() {
+        $.ajax({
+            url:"/model/state",
+            success:function (data) {
+                if(data.state==0){
+                    $("#showState").text("模型未启动训练");
+                    $("#submitBtn").prop("disabled",false);
+                }else if(data.state==1){
+                    $("#showState").text("正在训练数据。。。");
+                    $("#submitBtn").prop("disabled",true);
+                }
+                mv.$data.stepList = data.stepList;
+            }
+        });
+    }
+
+    let myChart = echarts.init($("#char")[0]);
+
+    let colors = ['white', 'yellow','pink'];
+    let option = {
+        color: colors,
+        tooltip: {
+            trigger: 'none',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        legend: {
+            textStyle:{
+                color:"white"
+            }
+        },
+        grid: {
+            top: 70,
+            bottom: 50
+        },
+        xAxis: [
+            {
+                type: 'category',
+                axisTick: {
+                    alignWithLabel: true
+                },
+                axisLine: {
+                    onZero: false,
+                    lineStyle: {
+                        color: colors[1]
+                    }
+                },
+                axisPointer: {
+                    label: {
+                        formatter: function (params) {
+                            return (
+                                'Precipitation  ' +
+                                params.value +
+                                (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                            );
+                        }
+                    }
+                },
+                // prettier-ignore
+                data:[]
+            },
+            {
+                type: 'category',
+                axisTick: {
+                    alignWithLabel: true
+                },
+                axisLine: {
+                    onZero: false,
+                    lineStyle: {
+                        color: colors[0]
+                    }
+                },
+                axisPointer: {
+                    label: {
+                        formatter: function (params) {
+                            return (
+                                'Precipitation  ' +
+                                params.value +
+                                (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                            );
+                        }
+                    }
+                },
+                // prettier-ignore
+                data:[]
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                axisLabel:{
+                    color:"white"
+                }
+            }
+        ],
+        series: [
+            {
+                name: 'precision',
+                type: 'line',
+                xAxisIndex: 1,
+                smooth: true,
+                emphasis: {
+                    focus: 'series'
+                },
+                data: []
+            }, {
+                name: 'recall',
+                type: 'line',
+                smooth: true,
+                emphasis: {
+                    focus: 'series'
+                },
+                data: []
+            },{
+                name: 'f1-score',
+                type: 'line',
+                smooth: true,
+                emphasis: {
+                    focus: 'series'
+                },
+                data: []
+            }
+        ]
+    };
+
+
+    //读取模型性能
+    function readByModel() {
+        const model = $('input[name="model"]:checked').val();
+        if(model==null){
+            return;
+        }
+        $.ajax({
+            url:"/readCsvByModel",
+            data:{model},
+            success:function (data) {
+                $("#model_performance").text("("+model+")");
+                let eopchs = [];
+                for(let i=0;i<data[0].length;i++){
+                    eopchs.push(i+1);
+                }
+                option.xAxis[0].data = eopchs;
+                option.xAxis[1].data = eopchs;
+                option.series[0].data = data[3];
+                option.series[1].data = data[4];
+                option.series[2].data = data[5];
+
+                myChart.setOption(option);
+                window.addEventListener('resize', function () {myChart.resize();});
+            }
+        });
+    }
+
+
+
+
+</script>
+
+</body>
+</html>

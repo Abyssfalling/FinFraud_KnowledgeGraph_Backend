@@ -1,0 +1,464 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>表格一</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <link rel="stylesheet" href="../front/js/bstable/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../front/js/bstable/css/bootstrap-table.css">
+    <link rel="stylesheet" href="../front/css/base.css">
+    <link href="../front/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css" />
+
+</head>
+<style>
+
+</style>
+<body>
+
+
+<div class="clear"></div>
+<!--内容部分-->
+<div class="con1 left" id="car_control">
+
+    <div style="background-color: black;padding: 0%">
+
+        <!--统计分析图-->
+        <div class="div_any" style="padding: 0%;">
+            <div class="left div_any01" style="height: 95%;width: 10%;margin-right: 1%">
+                <div class="div_any_child" style="height: 100%;">
+                    <div class="div_any_title" id="model">监控指标 </div>
+                    <p style="width: 100%;height: 100%;top:5%;position: relative">
+                    <div id="accurate" style="width: 100%;height: 25%;position: absolute;top: 0%;left: 0%"></div>
+                    <div id="precision" style="width: 100%;height: 25%;position: absolute;top: 25%;left: 0%"></div>
+                    <div id="recall" style="width: 100%;height: 25%;position: absolute;top: 50%;left: 0%"></div>
+                    <div id="f1_score" style="width: 100%;height: 25%;position: absolute;top: 75%;left: 0%"></div>
+                    </p>
+                </div>
+            </div>
+            <div class="div_any02 left " style="width: 44%;margin-right: 1%">
+                <div id="transaction" class="div_any_child div_height">
+                    <div style="flex: 1 0 100%;width: 100%;color: white">
+                        <p style="display: flex;flex: 1 0 100%">
+                            <span style="color: yellow;font-weight: bold;flex: 0 0 33%">交易总笔数：<i v-text="tx_num"></i></span>
+                            <span style="color: green;font-weight: bold;flex: 0 0 33%">正常交易笔数：<i v-text="tx_num-block_tx_num"></i></span>
+                            <span style="color: red;font-weight: bold;flex: 0 0 33%">异常交易笔数：<i v-text="block_tx_num"></i></span>
+                        </p>
+                        <p style="display: flex;flex: 1 0 100%">
+                            <span style="color: yellow;font-weight: bold;flex: 0 0 33%">交易总金额：<i v-text="keepTwoDecimal(tx_money)"></i></span>
+                            <span style="color: green;font-weight: bold;flex: 0 0 33%">正常交易金额：<i v-text="keepTwoDecimal(tx_money-block_tx_money)"></i></span>
+                            <span style="color: red;font-weight: bold;flex: 0 0 33%">异常交易金额：<i v-text="keepTwoDecimal(block_tx_money)"></i></span>
+                        </p>
+                    </div>
+
+                    <!--<div class="div_any_title">交易详情 </div>-->
+                    <ul style="display: flex;flex-wrap: wrap;background-color: blue">
+                        <li style="flex: 1 0 100%;display: flex;font-size: 16px;color: white;">
+                            <span style="flex: 0 0 15%;border-right: 1px solid yellow;text-align: center">交易账户</span>
+                            <span style="flex: 0 0 15%;border-right: 1px solid yellow;text-align: center">对方账户</span>
+                            <span style="flex: 0 0 25%;border-right: 1px solid yellow;text-align: center">交易金额（元）</span>
+                            <span style="flex: 0 0 30%;border-right: 1px solid yellow;text-align: center">交易时间</span>
+                            <span style="flex: 0 0 15%;border-right: 1px solid yellow;text-align: center">预测结果</span>
+                        </li>
+                        <li v-for="(val,index) in tx_list"  style="flex: 1 0 100%;display: flex;color: black;margin-bottom: 2px;font-size: 15px;">
+                            <div v-if="val.ml_model==0" style="flex: 1 0 100%;display: flex;background-color: springgreen;align-items: center">
+                                <span v-text="val.startNode.name" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="val.endNode.name" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="keepTwoDecimal(val.money)" style="flex: 0 0 25%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="val.txTime" style="flex: 0 0 30%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="'正常交易'" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                            </div>
+                            <div v-if="val.ml_model==1" style="flex: 1 0 100%;display: flex;background-color: red;align-items: center;">
+                                <span v-text="val.startNode.name" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="val.endNode.name" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="keepTwoDecimal(val.money)" style="flex: 0 0 25%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="val.txTime" style="flex: 0 0 30%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="'洗钱交易'" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                            </div>
+                            <div v-if="val.ml_model==2" style="flex: 1 0 100%;display: flex;background-color: grey;align-items: center;">
+                                <span v-text="val.startNode.name" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="val.endNode.name" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="keepTwoDecimal(val.money)" style="flex: 0 0 25%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="val.txTime" style="flex: 0 0 30%;border: 1px solid blue;text-align: center"></span>
+                                <span v-text="'洗钱交易'" style="flex: 0 0 15%;border: 1px solid blue;text-align: center"></span>
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+            <div class="left div_any01" style="width: 44%;margin-right: 0%">
+                <div class="div_any_child">
+                    <div class="div_any_title">实时交易金额</div>
+                    <p style="width: 100%;height: 100%;top:5%;position: relative" id="barChart"></p>
+                </div>
+                <div class="div_any_child">
+                    <div class="div_any_title">交易总金额</div>
+                    <p style="width: 100%;height: 100%;top:5%;position: relative" id="lineChart"></p>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+
+</div>
+
+
+
+
+
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="../front/js/base.js"></script>
+<script src="../front/js/echarts.js"></script>
+<script src="../front/js/ztree/jquery.ztree.all-3.5.js"></script>
+<!--<script src="js/listTree.js"></script>-->
+<script src="../front/js/bstable/js/bootstrap.min.js"></script>
+<script src="../front/js/bstable/js/bootstrap-table.js"></script>
+<script src="../front/js/bstable/js/bootstrap-table-zh-CN.min.js"></script>
+<script src="../front/js/layer_v2.1/layer/layer.js"></script>
+<script src="../front/js/vue@2.7.10.js"></script>
+
+<script>
+
+    let option = {
+        title:{
+            left: 'center',
+            top: 'center',
+            textStyle:{
+                fontSize: 15,
+                fontWeight: 'normal',
+                color: 'white'
+            }
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: "占比：{d}%"
+        },
+        legend: {
+            orient : 'vertical',
+            x : 'right',
+            textStyle : {
+                color : '#ffffff',
+            }
+        },
+        color:[],
+        calculable : false,
+        series : [
+            {
+                type:'pie',
+                radius : ['40%', '70%'],
+                animationDuration:10,
+                label:{
+                    show:true
+                },
+                itemStyle : {
+                    normal : {
+                        label : {
+                            show : true
+                        },
+                        labelLine : {
+                            show : false
+                        }
+                    },
+                    emphasis : {
+                        label : {
+                            show : true,
+                            position : 'center',
+                            textStyle : {
+                                fontSize : '20',
+                                fontWeight : 'bold'
+                            }
+                        }
+                    }
+                },
+                data:[]
+            }
+        ]
+    };
+
+    let myChartAccurate = echarts.init($("#accurate")[0]);
+    let myChartPrecision = echarts.init($("#precision")[0]);
+    let myChartRecall = echarts.init($("#recall")[0]);
+    let myChartF1Score = echarts.init($("#f1_score")[0]);
+
+
+    //实时监控模型指标
+    function monitorMetrics() {
+        $.ajax({
+            url:"/platform/getMetrics",
+            success:function (data) {
+                //展示准确率
+                if(data.metrics[0]=='1'){
+                    option.series[0].data = [
+                        {value: parseFloat(data.accurate)},
+                        {value: 1-parseFloat(data.accurate)}
+                    ];
+                    option.title.text = "accurate:"+parseFloat(data.accurate).toFixed(4);
+                    option.color = ['green','grey'];
+                    myChartAccurate.setOption(option);
+                    $("#accurate").show();
+                }else{
+                    $("#accurate").hide();
+                }
+
+                //展示精确率
+                if(data.metrics[1]=='1'){
+                    option.series[0].data = [
+                        {value: parseFloat(data.precision)},
+                        {value: 1-parseFloat(data.precision)}
+                    ];
+                    option.title.text = "precision:"+parseFloat(data.precision).toFixed(4);
+                    option.color = ['blue','grey'];
+                    myChartPrecision.setOption(option);
+                    $("#precision").show();
+                }else{
+                    $("#precision").hide();
+                }
+
+                //展示召回率
+                if(data.metrics[2]=='1'){
+                    option.series[0].data = [
+                        {value: parseFloat(data.recall)},
+                        {value: 1-parseFloat(data.recall)}
+                    ];
+                    option.title.text = "recall:"+parseFloat(data.recall).toFixed(4);
+                    option.color = ['red','grey'];
+                    myChartRecall.setOption(option);
+                    $("#recall").show();
+                }else{
+                    $("#recall").hide();
+                }
+
+                //展示f1分数
+                if(data.metrics[3]=='1'){
+                    option.series[0].data = [
+                        {value: parseFloat(data.f1_score)},
+                        {value: 1-parseFloat(data.f1_score)}
+                    ];
+                    option.title.text = "f1_score:"+parseFloat(data.f1_score).toFixed(4);
+                    option.color = ['purple','grey'];
+                    myChartF1Score.setOption(option);
+                    $("#f1_score").show();
+                }else{
+                    $("#f1_score").hide();
+                }
+
+            }
+        });
+    }
+    setInterval(function () {
+        monitorMetrics();
+    },200);
+
+
+
+    let mv = new Vue({
+        el:"#transaction",
+        data:{
+            tx_list:[],
+            tx_num:0,
+            tx_money:0,
+            block_tx_num:0,
+            block_tx_money:0
+        },
+        methods: {
+            keepTwoDecimal(value) {
+                return value.toFixed(2);
+            }
+        }
+
+    });
+
+
+
+
+    //柱状图
+    let barChart = echarts.init(document.getElementById('barChart'));
+    //折线图
+    let lineChart = echarts.init(document.getElementById('lineChart'));
+
+
+    // 指定图表的配置项和数据
+    let barOption = {
+        grid:{
+            left:'2%',
+            right:'2%',
+            top:'15%',
+            bottom:'12%',
+            containLabel:true
+        },
+        legend: {
+            data: ['正常交易', '异常交易'],
+            textStyle:{
+                color:'white'
+            }
+        },
+        xAxis: {
+            name:"交易时间",
+            data: [],
+            axisLabel:{
+                color:'white',
+                fontSize:10
+            },
+            nameTextStyle:{
+                color:'white'
+            },
+            nameLocation:'center',
+            nameGap:30
+        },
+        yAxis: {
+            name:"交易金额",
+            axisLabel:{
+                color:'white'
+            },
+            nameTextStyle:{
+                color:'white'
+            },
+            nameGap:10
+        },
+        series: [{
+            name: '正常交易',
+            type: 'bar',
+            stack:"stacked",
+            itemStyle: {
+                color: 'green'
+            },
+            data: []
+        }, {
+            name: '异常交易',
+            type: 'bar',
+            stack:"stacked",
+            itemStyle: {
+                color: 'red'
+            },
+            data: []
+        }]
+    };
+
+
+    // 指定图表的配置项和数据
+    let lineOption = {
+        grid:{
+            left:'2%',
+            right:'2%',
+            top:'15%',
+            bottom:'12%',
+            containLabel:true
+        },
+        legend: {
+            data: ['正常交易', '异常交易'],
+            textStyle:{
+                color:'white'
+            }
+        },
+        xAxis: {
+            name:"交易时间",
+            type: 'category',
+            data: [],
+            axisLabel:{
+                color:'white',
+                fontSize:10
+            },
+            nameTextStyle:{
+                color:'white'
+            },
+            nameLocation:'center',
+            nameGap:30
+        },
+        yAxis: {
+            name:"交易金额",
+            type: 'value',
+            axisLabel:{
+                color:'white'
+            },
+            nameTextStyle:{
+                color:'white'
+            }
+        },
+        series: [
+            {
+                name: '正常交易',
+                type: 'line',
+                data: [],
+                itemStyle: {
+                    color: 'green'
+                },
+                lineStyle:{
+                    width:3
+                }
+            },
+            {
+                name: '异常交易',
+                type: 'line',
+                data: [],
+                itemStyle: {
+                    color: 'red'
+                },
+                lineStyle:{
+                    width:3
+                }
+            }
+        ]
+    };
+
+
+
+
+    function displayTransaction() {
+        $.ajax({
+            url:"/platform/txDetection",
+            success:function (data) {
+                mv.$data.tx_list = data.transactionList;
+                mv.$data.tx_num = data.txNum;
+                mv.$data.tx_money = data.txMoney;
+                mv.$data.block_tx_num = data.blockTxNum;
+                mv.$data.block_tx_money = data.blockTxMoney;
+
+
+                /*******获取柱状图和折线图的数据（代码开始位置）*******/
+                let normalMoneyList = [];
+                let abnormalMoneyList = [];
+                let normalSumMoneyList = [];
+                let abnormalSumMoneyList = [];
+                let timeList = [];
+                for(let i in data.normalMoneyList){
+                    normalMoneyList.push(parseFloat(data.normalMoneyList[i]));
+                    abnormalMoneyList.push(parseFloat(data.abnormalMoneyList[i]));
+                    normalSumMoneyList.push(parseFloat(data.normalSumMoneyList[i]));
+                    abnormalSumMoneyList.push(parseFloat(data.abnormalSumMoneyList[i]));
+                    timeList.push(data.timeList[i]);
+                }
+
+                barOption.series[0].data = normalMoneyList;
+                barOption.series[1].data = abnormalMoneyList;
+                barOption.xAxis.data = timeList;
+                barChart.setOption(barOption);
+
+                lineOption.series[0].data = normalSumMoneyList;
+                lineOption.series[1].data = abnormalSumMoneyList;
+                lineOption.xAxis.data = timeList;
+                lineChart.setOption(lineOption);
+                /*******获取柱状图和折线图的数据（代码结束位置）*******/
+
+
+            }
+        });
+    }
+
+    displayTransaction();
+    setInterval(function () {
+        displayTransaction();
+    },150);
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

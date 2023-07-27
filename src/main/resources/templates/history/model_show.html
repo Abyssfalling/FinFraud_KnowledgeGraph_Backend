@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页界面</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <link rel="stylesheet" href="../front/css/base.css">
+</head>
+<body>
+
+<div class="static_top left">
+    <a style="color: white" href="/model/modelTrain" >模型个性化训练</a>
+</div>
+<div class="static_top left nav_active">
+    <a style="color: white" href="/model/modelShow">训练结果可视化</a>
+</div>
+
+
+<!--内容部分-->
+<div class="con left">
+
+    <!--数据总概-->
+    <div class="con_div">
+        <div class="con_div_text left">
+            <div class="con_div_text01 left">
+                <img src="../front/img/info_1.png" class="left text01_img">
+                <div class="left text01_div">
+                    <p>节点总数</p>
+                    <p id="nodeNum">0</p>
+                </div>
+            </div>
+            <div class="con_div_text01 right">
+                <img src="../front/img/info_2.png" class="left text01_img">
+                <div class="left text01_div">
+                    <p>关系总数</p>
+                    <p id="edgeNum">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="con_div_text left">
+            <div class="con_div_text01 left">
+                <img src="../front/img/info_4.png" class="left text01_img">
+                <div class="left text01_div">
+                    <p>正常节点总数</p>
+                    <p class="sky" id="rightNodeNum">0</p>
+                </div>
+            </div>
+            <div class="con_div_text01 right">
+                <img src="../front/img/info_5.png" class="left text01_img">
+                <div class="left text01_div">
+                    <p>正常关系总数</p>
+                    <p class="sky" id="rightEdgeNum">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="con_div_text left">
+
+            <div class="con_div_text01 left">
+                <img src="../front/img/info_6.png" class="left text01_img">
+                <div class="left text01_div">
+                    <p>异常节点总数</p>
+                    <p class="org" id="errorNodeNum">0</p>
+                </div>
+            </div>
+            <div class="con_div_text01 right">
+                <img src="../front/img/info_7.png" class="left text01_img">
+                <div class="left text01_div">
+                    <p>异常关系总数</p>
+                    <p class="org" id="errorEdgeNum">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--统计分析图-->
+    <div class="div_any">
+        <div class="left div_any01">
+            <div class="div_any_child" id="dataFilter">
+                <div class="div_any_title" id="nodeModel"><img src="../front/img/title_4.png">模型性能评估 </div>
+                <p style="width: 100%;height: 100%;top:5%;" id="nodeGraph"></p>
+            </div>
+            <div class="div_any_child">
+                <div class="div_any_title"><img src="../front/img/title_1.png">洗钱案例列表 </div>
+                <div class="table_p">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>案例编号</th>
+                            <th>涉案账户数</th>
+                        </tr>
+                        </thead>
+                        <tbody id="caseList">
+                            <tr v-for="(val,index) in caseListVO" style="background-color: rgb(8,24,50)" @click="filterDataByCaseId($event,val)">
+                                <td v-text="val.split(',')[0]"></td>
+                                <td v-text="val.split(',')[1]"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="div_any02 left ">
+            <div class="div_any_child div_height">
+                <div class="div_any_title any_title_width" style="top: -35px"><img src="../front/img/title_3.png">图谱展示 </div>
+                <div style="width: 100%;height: 100%;" id="knowledge_graph">
+                    <div style="border: 1px solid red;width: 50px;heigth:50px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="right div_any01">
+
+            <div class="div_any_child" id="attrInfos">
+                <div class="div_any_title" id="edgeModel"><img src="../front/img/title_2.png">正负节点比例 </div>
+                <p style="width: 100%;height: 100%;top:5%;" id="pieGraph"></p>
+            </div>
+
+
+            <div class="div_any_child">
+                <div class="div_any_title"><img src="../front/img/title_4.png">洗钱检测模型 </div>
+                <div class="table_p">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>模型</th>
+                        </tr>
+                        </thead>
+                        <tbody id="modelList">
+                            <tr v-for="(val,index) in modelListVO" style="background-color: rgb(8,24,50)" @click="amlByModel($event,val)">
+                                <td v-text="index+1"></td>
+                                <td v-text="val"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<script src="../front/js/vue@2.7.10.js"></script>
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="../front/js/echarts.js"></script>
+<script src="../front/js/knowledge_graph.js"></script>
+<script src="../front/js/base.js"></script>
+<script src="../front/js/index.js"></script>
+<script>
+
+    line("GCN");
+
+    //加载洗钱案例列表
+    loadCaseList();
+
+
+
+    var interval = null;
+    var timeRemaining = 0;
+
+    new Vue({
+        el:"#modelList",
+        data:{
+            //模型列表
+            modelList:['GCN',"GAT","RAW_GNN","MERE","GRAPH_RNN"],
+            //页面展示
+            modelListVO:['GCN',"GAT","RAW_GNN","MERE","GRAPH_RNN"],
+            //对应模型耗费时间(s)
+            costTimeList:[40]
+        },
+        methods:{
+            //根据洗钱模式筛选数据
+            amlByModel(event,model) {
+                const target = event.target.parentNode;
+                const parentChildren = target.parentNode.children;
+                for(let i=0;i<parentChildren.length;i++){
+                    const child = parentChildren[i];
+                    if(child==target){
+                        if(child.style.backgroundColor!="red"){
+                            child.style.backgroundColor = "red";//修改背景颜色
+                            clearInterval(interval);//清空定时器
+                            timeRemaining = this.costTimeList[i];
+                            this.updateTime(i);
+                            interval = setInterval(() => {
+                                this.updateTime(i);
+                            },1000);
+                            let vm = this;
+                            $.ajax({
+                                url:"/amlByModel",
+                                data:{model:model},
+                                success:function (data) {
+                                    if(data.code=="0"){
+                                        amlNode = data.nodeMap;
+                                        amlEdge = data.edgeMap;
+                                        clearInterval(interval);
+                                        vm.$set(vm.modelListVO,i,vm.modelList[i]);
+                                        updateNodes();
+                                        updateEdges();
+                                        setOprs();
+                                        //画模型性能评估折线图
+                                        line(model,"node");
+                                        line(model,"edge");
+                                    }else{
+                                        alert("失败！");
+                                    }
+                                }
+                            });
+                        }else{
+                            child.style.backgroundColor = "rgb(8,24,50)";
+                            clearInterval(interval);
+                            this.$set(this.modelListVO,i,this.modelList[i]);
+                            amlNode = null;
+                            amlEdge = null;
+                            updateNodes();
+                            updateEdges();
+                            setOprs();
+                        }
+                    }else{
+                        child.style.backgroundColor = "rgb(8,24,50)";
+                        this.$set(this.modelListVO,i,this.modelList[i]);
+                    }
+                }
+            },
+            updateTime(i){
+                // timeRemaining -= 1;
+                // this.$set(this.modelListVO,i,this.modelList[i]+"，检测中，预计剩余"+timeRemaining+"s");
+            }
+        }
+    });
+
+    //洗钱案例列表
+    var caseListVO = [];
+    new Vue({
+        el:"#caseList",
+        data:{
+            caseListVO:caseListVO
+        },
+        methods:{
+            filterDataByCaseId(event,caseId){
+                const target = event.target.parentNode;
+                const parentChildren = target.parentNode.children;
+                for(let i=0;i<parentChildren.length;i++){
+                    const child = parentChildren[i];
+                    if(child==target){
+                        if(child.style.backgroundColor!="red"){
+                            //根据当前案例编号获取案例
+                            child.style.backgroundColor = "red";//修改背景颜色
+                            filterDataByCaseId(caseId.split(",")[0]);
+                        }else{
+                            child.style.backgroundColor = "rgb(8,24,50)";
+                            loadData();
+                        }
+                    }else{
+                        child.style.backgroundColor = "rgb(8,24,50)";
+                    }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

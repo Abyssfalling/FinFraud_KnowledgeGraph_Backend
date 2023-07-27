@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>业务申请页面</title>
+    <link rel="icon" href="../front/img/aml.jpeg">
+    <link rel="stylesheet" href="../front/css/base.css">
+</head>
+<body>
+
+<header class="header left" style="display: flex">
+    <div class="left nav">
+        <ul>
+            <li onclick="location.href='/index'"><i class="nav_2"></i><a href="#">首页</a> </li>
+            <li onclick="change('business')" id="business" class="nav_active"><i class="nav_1"></i><a href="#">业务申请</a> </li>
+            <li onclick="change('transaction')" id="transaction"><i class="nav_2"></i><a href="#">交易监控</a> </li>
+        </ul>
+    </div>
+    <div class="header_center left">
+        <h2><strong>反洗钱业务申请平台</strong></h2>
+        <p class="color_font"><small>Anti-Money Laundering Business Application Platform</small></p>
+    </div>
+    <div class="right nav text_right">
+        <ul>
+        </ul>
+    </div>
+</header>
+
+<!--内容部分-->
+<div id="iframe">
+    <iframe style="border: none" class="con left" width="100%" height="800px" src="/apply/applyBusiness"></iframe>
+</div>
+
+<script src="../front/js/jquery/jQuery-2.2.0.min.js"></script>
+<script src="../front/js/base.js"></script>
+<script>
+
+
+    function change(tag) {
+        $("#business").attr("class","");
+        $("#transaction").attr("class","");
+        if(tag=='business'){
+            $("#iframe").empty();
+            $("#iframe").append("<iframe style=\"border: none\" class=\"con left\" width=\"100%\" height=\"800px\" src=\"/apply/applyBusiness\"></iframe>");
+            $("#business").attr("class","nav_active");
+        }else if(tag=='transaction'){
+            $("#iframe").empty();
+            $("#iframe").append("<iframe style=\"border: none\" class=\"con left\" width=\"100%\" height=\"800px\" src=\"/risk/transactionDetection\"></iframe>");
+            $("#transaction").attr("class","nav_active");
+        }
+    }
+
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+body {
+    background-color: #F0F0F0;
+    font-family: Arial, sans-serif;
+}
+
+.con {
+    width: 100%;
+    margin: auto;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+input[type=text] {
+    border-radius: 5px;
+    padding: 5px;
+    border: 1px solid #4b8df8;
+}
+
+.btn {
+    margin-left: 20px;
+    font-size: 15px;
+    color: red;
+    background-color: yellow;
+    border: none;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    text-align: center;
+    margin: 5px;
+}
+
+th {
+    background-color: #666;
+    color: white;
+}
+
+td {
+    padding: 10px;
+}
