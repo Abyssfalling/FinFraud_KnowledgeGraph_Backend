@@ -6,6 +6,7 @@ import com.dhu.aml.entity.UserNode;
 import com.dhu.aml.entity.UserRelation;
 import com.dhu.aml.entity.categories.Category;
 import com.dhu.aml.entity.categories.ItemStyle;
+import com.dhu.aml.entity.categories.lineStyle;
 import com.dhu.aml.service.Neo4jBehaviorSpaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import com.dhu.aml.service.Neo4jService;
 
 @RestController
 @RequestMapping("/api")
@@ -37,32 +39,34 @@ public class BehaviorSpaceController {
         List<UserRelation> links = new ArrayList<>();
 
         // 构建Category列表
-        categories.add(new Category(0, "实体","", new ItemStyle("#E99D42","")));
+        categories.add(new Category(0, "实体","circle", new ItemStyle("#E99D42","#E99D42")));
         categories.add(new Category(1, "行为", "circle",new ItemStyle("#4095E5","4095E5")));
         categories.add(new Category(2, "超行为", "rect",new ItemStyle("#fff","81B337")));
 
         // 构建Node列表
         for (Map<String, Object> nodeFromDb : nodesFromDb) {
-            Long id = (Long) nodeFromDb.get("id");
+            Long identity = (Long) nodeFromDb.get("id");
             String name = (String) nodeFromDb.get("name");
             String category = nodeFromDb.get("category").toString();
             String index = nodeFromDb.get("index").toString();
+            String id = Long.toString(Long.parseLong(index));
             //Long identity = (Long) nodeFromDb.get("identity");
             if(Objects.equals(category, "1"))
             {
-                nodes.add(new UserNode(id, name, category, index));
+                nodes.add(new UserNode(identity, name, category, index, id));
             }
             // System.out.println("category:"+category);
         }
 
         for (Map<String, Object> nodeFromDb : nodesFromDb) {
-            Long id = (Long) nodeFromDb.get("id");
+            Long identity = (Long) nodeFromDb.get("id");
             String name = (String) nodeFromDb.get("name");
             String category = nodeFromDb.get("category").toString();
             String index = nodeFromDb.get("index").toString();
+            String id = Long.toString(Long.parseLong(index) + Neo4jService.getActionCount());
             if(Objects.equals(category, "2"))
             {
-                nodes.add(new UserNode(id, name, category,index));
+                nodes.add(new UserNode(identity, name, category, index, id));
             }
             // System.out.println("category:"+category);
         }
@@ -72,13 +76,19 @@ public class BehaviorSpaceController {
             Long id = Long.parseLong(linkFromDb.get("id").toString());
             // System.out.println("id:"+id);
             String source = (String) linkFromDb.get("source");
-            UserNode sourceNode = new UserNode();
-            sourceNode.setName(source);
+            // UserNode sourceNode = new UserNode();
+            // sourceNode.setName(source);
             String target = (String) linkFromDb.get("target");
-            UserNode targetNode = new UserNode();
-            targetNode.setName(target);
-            if (source.contains("超行为") || target.contains("超行为"))
-                links.add(new UserRelation(id, sourceNode, targetNode));
+            // UserNode targetNode = new UserNode();
+            // targetNode.setName(target);
+            if (source.contains("超行为"))
+            {
+                links.add(new UserRelation(id, source, target, new lineStyle("#81B337")));
+            }
+            else if (target.contains("超行为"))
+            {
+                links.add(new UserRelation(id, source, target, new lineStyle("#4095E5")));
+            }
         }
 
         // 设置响应数据
