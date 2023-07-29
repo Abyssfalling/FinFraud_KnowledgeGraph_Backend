@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.dhu.aml.service.Neo4jService.getActionCount;
+import static com.dhu.aml.service.Neo4jService.getEntityCount;
+
 @RestController
 @RequestMapping("/api")
 public class SubjectSpaceController {
@@ -39,31 +42,36 @@ public class SubjectSpaceController {
 
         // 构建Category列表
         categories.add(new Category(0, "实体","circle", new ItemStyle("#E99D42","#E99D42")));
-        categories.add(new Category(1, "行为", "circle", new ItemStyle("#4095E5", "4095E5")));
-        categories.add(new Category(2, "超行为", "rect", new ItemStyle("#fff", "81B337")));
+        categories.add(new Category(1, "行为", "circle", new ItemStyle("#4095E5", "#4095E5")));
+        categories.add(new Category(2, "超行为", "rect", new ItemStyle("#fff", "#81B337")));
 
 
         // 构建Node列表
         for (Map<String, Object> nodeFromDb : nodesFromDb) {
-            Long identity = (Long) nodeFromDb.get("id");
+            Long identity = (Long) nodeFromDb.get("identity");
             String name = (String) nodeFromDb.get("name");
-            String category = nodeFromDb.get("category").toString();
+            String cate = nodeFromDb.get("cate").toString();
             String index = nodeFromDb.get("index").toString();
-            String id = Long.toString(Long.parseLong(index));
+            int id = Integer.parseInt(index);
+            int category = Integer.parseInt(cate);
             //Long identity = (Long) nodeFromDb.get("identity");
-            if (Objects.equals(category, "0")) {
+            if(Objects.equals(cate, "0"))
+            {
                 nodes.add(new UserNode(identity, name, category, index, id));
             }
             // System.out.println("category:"+category);
         }
 
         for (Map<String, Object> nodeFromDb : nodesFromDb) {
-            Long identity = (Long) nodeFromDb.get("id");
+            Long identity = (Long) nodeFromDb.get("identity");
             String name = (String) nodeFromDb.get("name");
-            String category = nodeFromDb.get("category").toString();
+            String cate = nodeFromDb.get("cate").toString();
             String index = nodeFromDb.get("index").toString();
-            String id = Long.toString(Long.parseLong(index) + Neo4jService.getEntityCount());
-            if (Objects.equals(category, "1")) {
+            int id = Integer.parseInt(index) + getEntityCount();
+            int category = Integer.parseInt(cate);
+            //Long identity = (Long) nodeFromDb.get("identity");
+            if(Objects.equals(cate, "1"))
+            {
                 nodes.add(new UserNode(identity, name, category, index, id));
             }
         }
@@ -71,14 +79,28 @@ public class SubjectSpaceController {
             // 构建Link列表
             for (Map<String, Object> linkFromDb : linksFromDb) {
                 Long id = Long.parseLong(linkFromDb.get("id").toString());
-                String source = (String) linkFromDb.get("source");
-                // UserNode sourceNode = new UserNode();
-                // sourceNode.setName(source);
-                String target = (String) linkFromDb.get("target");
-                // UserNode targetNode = new UserNode();
-                // targetNode.setName(target);
-                if (!source.contains("超行为") && !target.contains("超行为"))
-                    links.add(new UserRelation(id, source, target));
+                int sourceCate = Integer.parseInt(linkFromDb.get("sourceCate").toString());
+                int targetCate = Integer.parseInt(linkFromDb.get("targetCate").toString());
+
+                int sourceIndex = Integer.parseInt(linkFromDb.get("sourceIndex").toString());
+                int targetIndex = Integer.parseInt(linkFromDb.get("targetIndex").toString());
+
+                if (sourceCate != 2 && targetCate != 2)
+                {
+                    if(sourceCate == 0)
+                    {
+                        int source = sourceIndex;
+                        int target = getEntityCount() + targetIndex;
+                        links.add(new UserRelation(id, source, target));
+                    }
+
+                    else if(sourceCate == 1)
+                    {
+                        int source = getEntityCount() + sourceIndex;
+                        int target = targetIndex;
+                        links.add(new UserRelation(id, source, target));
+                    }
+                }
             }
 
             // 设置响应数据
@@ -86,7 +108,7 @@ public class SubjectSpaceController {
             response.setNodes(nodes);
             response.setLinks(links);
 
-            System.out.println(nodes.size() + "size");
+            // System.out.println(nodes.size() + "size");
 
             return response;
         }

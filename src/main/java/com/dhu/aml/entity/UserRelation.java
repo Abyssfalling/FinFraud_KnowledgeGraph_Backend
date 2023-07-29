@@ -19,13 +19,13 @@ public class UserRelation {
     private UserNode targetNode;
 
     @Property
-    private String source;
+    private int source;
 
     @Property
-    private String target;
+    private int target;
 
     @Property
-    private lineStyle linestyle;
+    private lineStyle lineStyle;
 
 
     public UserRelation() {
@@ -37,16 +37,16 @@ public class UserRelation {
         this.targetNode = endNode;
     }
 
-    public UserRelation(Long id, String source, String target) {
+    public UserRelation(Long id, int source, int target) {
         this.id = id;
         this.source = source;
         this.target = target;
     }
 
-    public UserRelation(Long id, String source, String target, lineStyle linestyle) {
+    public UserRelation(Long id, int source, int target, lineStyle linestyle) {
         this.id = id;
         this.source = source;
         this.target = target;
-        this.linestyle = linestyle;
+        this.lineStyle = linestyle;
     }
 }

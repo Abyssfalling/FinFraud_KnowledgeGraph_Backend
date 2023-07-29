@@ -14,23 +14,6 @@ public class BehaviorSpaceResponse {
     public BehaviorSpaceResponse() {
     }
 
-//    public static List<Category> generateCategories() {
-//        List<Category> categories = new ArrayList<>();
-//
-//        // Create and add "实体" category
-//        ItemStyle entityItemStyle = new ItemStyle("#4095E5","4095E5");
-//        Category entityCategory1 = new Category(1, "行为","circle",entityItemStyle);
-//        categories.add(entityCategory1);
-//
-//        // Create and add "行为" category
-//        ItemStyle behaviorItemStyle = new ItemStyle("#fff","81B337");
-//        Category behaviorCategory1 = new Category(2, "","rect",behaviorItemStyle);
-//        categories.add(behaviorCategory1);
-//
-//        return categories;
-//    }
-
-
     public BehaviorSpaceResponse(List<Category> categories, List<UserNode> nodes, List<UserRelation> links) {
         this.categories = categories;
         this.nodes = nodes;

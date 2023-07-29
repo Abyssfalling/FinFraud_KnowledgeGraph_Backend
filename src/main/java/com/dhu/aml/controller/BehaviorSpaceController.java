@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Objects;
 import com.dhu.aml.service.Neo4jService;
 
+import static com.dhu.aml.service.Neo4jService.getActionCount;
+import static com.dhu.aml.service.Neo4jService.getEntityCount;
+
 @RestController
 @RequestMapping("/api")
 public class BehaviorSpaceController {
@@ -40,18 +43,19 @@ public class BehaviorSpaceController {
 
         // 构建Category列表
         categories.add(new Category(0, "实体","circle", new ItemStyle("#E99D42","#E99D42")));
-        categories.add(new Category(1, "行为", "circle",new ItemStyle("#4095E5","4095E5")));
-        categories.add(new Category(2, "超行为", "rect",new ItemStyle("#fff","81B337")));
+        categories.add(new Category(1, "行为", "circle",new ItemStyle("#4095E5","#4095E5")));
+        categories.add(new Category(2, "超行为", "rect",new ItemStyle("#fff","#81B337")));
 
         // 构建Node列表
         for (Map<String, Object> nodeFromDb : nodesFromDb) {
-            Long identity = (Long) nodeFromDb.get("id");
+            Long identity = (Long) nodeFromDb.get("identity");
             String name = (String) nodeFromDb.get("name");
-            String category = nodeFromDb.get("category").toString();
+            String cate = nodeFromDb.get("cate").toString();
             String index = nodeFromDb.get("index").toString();
-            String id = Long.toString(Long.parseLong(index));
+            int id = Integer.parseInt(index);
+            int category = Integer.parseInt(cate);
             //Long identity = (Long) nodeFromDb.get("identity");
-            if(Objects.equals(category, "1"))
+            if(Objects.equals(cate, "1"))
             {
                 nodes.add(new UserNode(identity, name, category, index, id));
             }
@@ -59,12 +63,14 @@ public class BehaviorSpaceController {
         }
 
         for (Map<String, Object> nodeFromDb : nodesFromDb) {
-            Long identity = (Long) nodeFromDb.get("id");
+            Long identity = (Long) nodeFromDb.get("identity");
             String name = (String) nodeFromDb.get("name");
-            String category = nodeFromDb.get("category").toString();
+            String cate = nodeFromDb.get("cate").toString();
             String index = nodeFromDb.get("index").toString();
-            String id = Long.toString(Long.parseLong(index) + Neo4jService.getActionCount());
-            if(Objects.equals(category, "2"))
+            int id = Integer.parseInt(index) + getActionCount();
+            int category = Integer.parseInt(cate);
+            //Long identity = (Long) nodeFromDb.get("identity");
+            if(Objects.equals(cate, "2"))
             {
                 nodes.add(new UserNode(identity, name, category, index, id));
             }
@@ -74,19 +80,24 @@ public class BehaviorSpaceController {
         // 构建Link列表
         for (Map<String, Object> linkFromDb : linksFromDb) {
             Long id = Long.parseLong(linkFromDb.get("id").toString());
-            // System.out.println("id:"+id);
-            String source = (String) linkFromDb.get("source");
-            // UserNode sourceNode = new UserNode();
-            // sourceNode.setName(source);
-            String target = (String) linkFromDb.get("target");
-            // UserNode targetNode = new UserNode();
-            // targetNode.setName(target);
-            if (source.contains("超行为"))
-            {
+            int sourceCate = Integer.parseInt(linkFromDb.get("sourceCate").toString());
+            int targetCate = Integer.parseInt(linkFromDb.get("targetCate").toString());
+
+            int sourceIndex = Integer.parseInt(linkFromDb.get("sourceIndex").toString());
+            int targetIndex = Integer.parseInt(linkFromDb.get("targetIndex").toString());
+
+//            System.out.println("sourceCate" + sourceCate);
+//            System.out.println("targetCate" + targetCate);
+//            System.out.println("sourceIndexStr" + sourceIndex);
+//            System.out.println("targetIndexStr" + targetIndex);
+
+            if (sourceCate == 2) {
+                int source = getActionCount() + sourceIndex;
+                int target = targetIndex;
                 links.add(new UserRelation(id, source, target, new lineStyle("#81B337")));
-            }
-            else if (target.contains("超行为"))
-            {
+            } else if (targetCate == 2) {
+                int source = sourceIndex;
+                int target = getActionCount() + targetIndex;
                 links.add(new UserRelation(id, source, target, new lineStyle("#4095E5")));
             }
         }
@@ -96,7 +107,7 @@ public class BehaviorSpaceController {
         response.setNodes(nodes);
         response.setLinks(links);
 
-        System.out.println(nodes.size()+"size");
+        // System.out.println(nodes.size()+"size");
 
         return response;
     }

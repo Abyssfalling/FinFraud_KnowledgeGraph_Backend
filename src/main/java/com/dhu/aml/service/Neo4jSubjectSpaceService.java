@@ -1,8 +1,10 @@
 package com.dhu.aml.service;
 
+import com.dhu.aml.entity.UserRelation;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
+import com.dhu.aml.dao.UserRepository;
 import org.neo4j.driver.types.Node;
 import org.springframework.stereotype.Service;
 import scala.Int;
@@ -36,16 +38,16 @@ public class Neo4jSubjectSpaceService {
                 Record record = result.next();
                 Node node = record.get("n").asNode();
                 Map<String, Object> nodeProperties = new HashMap<>();
-                nodeProperties.put("id", node.id());
+                nodeProperties.put("identity", node.id());
                 nodeProperties.put("name", node.get("name").asString());
-                nodeProperties.put("category", node.get("category")); // 请根据实际节点类型进行分类
+                nodeProperties.put("cate", node.get("cate")); // 请根据实际节点类型进行分类
                 nodeProperties.put("index", node.get("index"));
 
-                if(Integer.parseInt(node.get("category").toString()) == 0 || Integer.parseInt(node.get("category").toString()) == 1) {
+                if(Integer.parseInt(node.get("cate").toString()) == 0 || Integer.parseInt(node.get("cate").toString()) == 1) {
                     nodes.add(nodeProperties);
                 }
             }
-            System.out.println(nodes.size()+"-----------");
+            // System.out.println(nodes.size()+"-----------");
             return nodes;
         } catch (ServiceUnavailableException e) {
             // 处理连接异常
@@ -57,15 +59,17 @@ public class Neo4jSubjectSpaceService {
     // 从Neo4j数据库中获取链接数据
     public List<Map<String, Object>> getLinks() {
         try (Session session = driver.session()) {
-            String query = "MATCH (source)-[r]->(target) RETURN source.name as source, target.name as target";
+            String query = "MATCH (source)-[r]->(target) RETURN ID(r) as id, source.cate as sourceCate, source.index as sourceIndex, target.cate as targetCate, target.index as targetIndex";
             Result result = session.run(query);
             List<Map<String, Object>> links = new ArrayList<>();
             while (result.hasNext()) {
                 Record record = result.next();
                 Map<String, Object> linkProperties = new HashMap<>();
-                linkProperties.put("id", links.size());
-                linkProperties.put("source", record.get("source").asString());
-                linkProperties.put("target", record.get("target").asString());
+                linkProperties.put("id", record.get("id").asLong());
+                linkProperties.put("sourceCate", record.get("sourceCate"));
+                linkProperties.put("sourceIndex", record.get("sourceIndex"));
+                linkProperties.put("targetCate", record.get("targetCate"));
+                linkProperties.put("targetIndex", record.get("targetIndex"));
                 links.add(linkProperties);
             }
             return links;

@@ -1,7 +1,6 @@
 package com.dhu.aml.entity;
 
 
-
 import com.dhu.aml.entity.categories.Category;
 import com.dhu.aml.entity.categories.ItemStyle;
 

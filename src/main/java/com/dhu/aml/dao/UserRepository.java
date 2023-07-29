@@ -1,17 +1,29 @@
 package com.dhu.aml.dao;
 
+import com.dhu.aml.entity.User;
 import com.dhu.aml.entity.UserNode;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.annotation.Query; // 确保使用正确的包路径
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends Neo4jRepository<UserNode, Long> {
-    // UserNode findByNameAndCategory(String name, String category);
 
     @Query("MATCH (node:Entity) RETURN count(node) AS entityCount")
-    Long getEntityCount();
+    int getEntityCount();
 
     @Query("MATCH (node:Action) RETURN count(node) AS actionCount")
-    Long getActionCount();
+    int getActionCount();
+
+    @Query("MATCH (node:HyperAction) RETURN count(node) AS hyperactionCount")
+    int getHyperActionCount();
+
+    @Query("MATCH (n:Node {name: $name}) RETURN n")
+    UserNode FindByName(String name);
 }
+
+
