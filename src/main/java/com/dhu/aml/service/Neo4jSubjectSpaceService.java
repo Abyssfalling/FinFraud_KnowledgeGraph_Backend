@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 public class Neo4jSubjectSpaceService {
 
-    private final Driver driver;
+    private static Driver driver = null;
 
     // 在构造函数中初始化Neo4j驱动
     public Neo4jSubjectSpaceService() {
@@ -77,6 +77,54 @@ public class Neo4jSubjectSpaceService {
             // 处理连接异常
             e.printStackTrace();
             return new ArrayList<>();
+        }
+    }
+
+    // 从Neo4j数据库中获取与指定名称相关的节点和关联数据
+    public static Map<String, List<Map<String, Object>>> getNodesAndLinksByName(String name) {
+        try (Session session = driver.session()) {
+            String query = "MATCH (n {name: $name})-[*]-(related) RETURN n, related";
+            Result result = session.run(query, Values.parameters("name", name));
+
+            List<Map<String, Object>> nodes = new ArrayList<>();
+            List<Map<String, Object>> links = new ArrayList<>();
+
+            while (result.hasNext()) {
+                Record record = result.next();
+                Node node = record.get("n").asNode();
+                Map<String, Object> nodeProperties = new HashMap<>();
+                nodeProperties.put("identity", node.id());
+                nodeProperties.put("name", node.get("name").asString());
+                nodeProperties.put("cate", node.get("cate")); // 请根据实际节点类型进行分类
+                nodeProperties.put("index", node.get("index"));
+
+                nodes.add(nodeProperties);
+
+                Node relatedNode = record.get("related").asNode();
+                Map<String, Object> relatedNodeProperties = new HashMap<>();
+                relatedNodeProperties.put("identity", relatedNode.id());
+                relatedNodeProperties.put("name", relatedNode.get("name").asString());
+                relatedNodeProperties.put("cate", relatedNode.get("cate")); // 请根据实际节点类型进行分类
+                relatedNodeProperties.put("index", relatedNode.get("index"));
+
+                nodes.add(relatedNodeProperties);
+
+                Map<String, Object> linkProperties = new HashMap<>();
+                linkProperties.put("source", node.id());
+                linkProperties.put("target", relatedNode.id());
+                // Add any other properties related to the link if needed
+
+                links.add(linkProperties);
+            }
+
+            Map<String, List<Map<String, Object>>> resultData = new HashMap<>();
+            resultData.put("nodes", nodes);
+            resultData.put("links", links);
+            return resultData;
+        } catch (ServiceUnavailableException e) {
+            // 处理连接异常
+            e.printStackTrace();
+            return new HashMap<>();
         }
     }
 }

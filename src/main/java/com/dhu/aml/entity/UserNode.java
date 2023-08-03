@@ -3,6 +3,7 @@ package com.dhu.aml.entity;
 import com.dhu.aml.service.Neo4jService;
 import lombok.Data;
 import org.neo4j.ogm.annotation.*;
+import scala.Int;
 
 @Data
 @NodeEntity(label = "Person")
@@ -41,6 +42,11 @@ public class UserNode {
 
     public UserNode(String name){
         this.name = name;
+    }
+
+    public UserNode(String subjectName, int cate) {
+        this.name = subjectName;
+        this.cate = Integer.toString(cate);
     }
 
     public Long getIdentity() {

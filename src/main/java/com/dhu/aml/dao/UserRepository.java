@@ -7,9 +7,6 @@ import org.springframework.data.neo4j.annotation.Query; // 确保使用正确的
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface UserRepository extends Neo4jRepository<UserNode, Long> {
 
@@ -21,9 +18,6 @@ public interface UserRepository extends Neo4jRepository<UserNode, Long> {
 
     @Query("MATCH (node:HyperAction) RETURN count(node) AS hyperactionCount")
     int getHyperActionCount();
-
-    @Query("MATCH (n:Node {name: $name}) RETURN n")
-    UserNode FindByName(String name);
 }
 
 
